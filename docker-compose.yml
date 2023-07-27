@@ -1,0 +1,33 @@
+version: "3.7"
+
+networks:
+  redis:
+
+services:
+
+  worker:
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+    image: worker_311
+    user: docker:www-data
+    command: uvicorn worker.main:app --reload --host 0.0.0.0
+    env_file:
+      - ./worker/.env
+    ports:
+      - 8000:8000
+    depends_on:
+      - redis
+    networks:
+      - redis
+    volumes:
+      - ./worker:/app
+
+  redis:
+    image: redis:7.0.12-alpine
+    restart: always
+    command: redis-server --save 60 1
+    networks:
+      - redis
+    volumes:
+      - ./redis_data:/data

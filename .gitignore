@@ -1,0 +1,9 @@
+
+*.pyc
+__pycache__/
+.venv
+*sublime*
+pgdata
+redis_data
+ignored_files
+*.log

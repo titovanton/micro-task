@@ -1,0 +1,12 @@
+.pytest_cache
+ignored_files
+pgdata
+redis_data
+.pyc
+__pycache__
+logs.txt
+*sublime*
+Dockerfile*
+*docker*
+*git*
+.venv
