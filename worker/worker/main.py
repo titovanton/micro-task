@@ -62,4 +62,4 @@ async def get_task_api(task_id: StrOrNone = None) -> dict:
     if not task:
         raise not_found
 
-    return task.dict()
+    return task.model_dump()

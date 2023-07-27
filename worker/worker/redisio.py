@@ -13,20 +13,20 @@ from .settings import TASK_QUEUE
 def get_task(task_id: UUID) -> Task | None:
     task_json = rcon.get(str(task_id))
     if task_json:
-        return Task.parse_raw(task_json)
+        return Task.model_validate_json(task_json)
     return None
 
 
 def save_task_obj(task: Task) -> None:
     """
     Adds key->value record to the DB,
-    where key is task.id and value is task.json().
+    where key is task.id and value is task.model_dump_json().
     """
-    rcon.set(str(task.id), task.json())
+    rcon.set(str(task.id), task.model_dump_json())
 
 
 def add_task_obj(task: Task) -> None:
-    rcon.lpush(TASK_QUEUE, task.json())
+    rcon.lpush(TASK_QUEUE, task.model_dump_json())
 
 
 def add_task(
@@ -36,13 +36,13 @@ def add_task(
     """
     Creates task and adds task object to the queue and
     adds key->value record to the DB,
-    where key is task.id and value is task.json().
+    where key is task.id and value is task.model_dump_json().
     """
 
     id = uuid6()
     log.info(f'Adding task#"{id}" to the queue...')
     now = datetime.now()
-    _exp_sec = exp_sec if exp_sec else choice(range(3 * 60))
+    _exp_sec = exp_sec if exp_sec else choice(range(15, 3 * 60))
     exp_date = now + timedelta(seconds=_exp_sec)
     task = Task(id=id, title=task_title, expiration_date=exp_date)
 
@@ -65,7 +65,7 @@ def poll_queue() -> None:
     queue: deque[Task] = deque()
 
     while task_json := rcon.rpop(TASK_QUEUE):
-        task = Task.parse_raw(task_json)
+        task = Task.model_validate_json(task_json)
         if task.expiration_date <= datetime.now():
             task.status = TaskStatus.DONE
 
