@@ -7,8 +7,8 @@ def test_get_task_api(mocked, client, create_task):
     URL = '/'
 
     response = client.get(URL)
-    assert response.status_code == HTTPStatus.OK
-    assert 'message' in response.json()
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+    assert b'task_id' in response.content
 
     response = client.get(URL, params={'task_id': 'anything'})
     assert response.status_code == HTTPStatus.NOT_FOUND
@@ -30,6 +30,7 @@ def test_add_task_api(mocked, client, create_task):
 
     response = client.post(URL)
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+    assert b'task_title' in response.content
 
     mocked.return_value = 1
     response = client.post(URL, params={

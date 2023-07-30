@@ -12,16 +12,6 @@ from .redisio import add_task, poll_queue, get_task
 app = FastAPI()
 
 
-StrOrNone = Annotated[
-    str | None,
-    Query(description='str or null')
-]
-IntOrNone = Annotated[
-    int | None,
-    Query(description='str or null')
-]
-
-
 async def background_broker():
     while True:
         log.info('Poll queue...')
@@ -37,21 +27,23 @@ async def on_startup():
 @app.post('/')
 async def add_task_api(
     task_title: str,
-    exp_sec: IntOrNone = None,
+    exp_sec: Annotated[
+        int | None,
+        Query(description='Int or Null / Blank')
+    ] = None,
 ) -> dict:
     id = add_task(task_title, exp_sec)
     return {'task_id': id}
 
 
 @app.get('/')
-async def get_task_api(task_id: StrOrNone = None) -> dict:
+async def get_task_api(
+    task_id: Annotated[str, Query(description='UUID v6')]
+) -> dict:
     not_found = HTTPException(
         status_code=HTTPStatus.NOT_FOUND,
         detail=f'Task#"{task_id}" not found!'
     )
-
-    if not task_id:
-        return {'message': 'Please specify GET parameter `task_id`'}
 
     try:
         id = UUID(task_id)
