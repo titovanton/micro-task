@@ -1,3 +1,4 @@
+from collections import deque
 from datetime import datetime, timedelta
 from random import choice
 
@@ -61,7 +62,7 @@ def poll_queue() -> None:
         tasks which are done.
     """
 
-    queue: list[Task] = []
+    queue: deque[Task] = deque()
 
     while task_json := rcon.rpop(TASK_QUEUE):
         task = Task.parse_raw(task_json)
@@ -72,7 +73,7 @@ def poll_queue() -> None:
 
             log.info(f'Task#"{task.id}" is done!')
         else:
-            queue.insert(0, task)
+            queue.appendleft(task)
 
     while len(queue):
         task = queue.pop()
